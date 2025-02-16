@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id       String   @id @map("_id")
+  fullname String   @unique
+  section  String
+  report   Report[]
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  kaltura  Kaltura?
+}
+
+model Kaltura {
+  id          String  @id @default(uuid()) @map("_id")
+  student     Student @relation(fields: [studentId], references: [id])
+  studentId   String  @unique
+  kalturaName String
+}
+
+model Report {
+  id         String     @id @default(uuid()) @map("_id")
+  student    Student    @relation(fields: [studentId], references: [id])
+  studentId  String
+  video      Video      @relation(fields: [videoId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  videoId    String
+  percentage Int
+  createAt   DateTime   @default(now())
+  updateAt   DateTime   @updatedAt
+  version    Update     @relation(fields: [versionId], references: [id])
+  versionId  String
+  raw        RawReport?
+}
+
+model RawReport {
+  id                  String @id @default(uuid()) @map("_id")
+  name                String
+  fullName            String
+  uniqueVideos        String
+  countPlays          String
+  sumTimeViewed       String
+  avgTimeViewed       String
+  avgViewDropOff      String
+  countLoads          String
+  loadPlayRatio       String
+  avgCompletionRate   String
+  countViral          String
+  totalCompletionRate String
+  report              Report @relation(fields: [reportId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  reportId            String @unique
+}
+
+model Video {
+  id       String   @id @map("_id")
+  Report   Report[]
+  title    String?
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+}
+
+model Update {
+  id          String   @id @default(uuid()) @map("_id")
+  description String?
+  createAt    DateTime @default(now())
+  Report      Report[]
+}
